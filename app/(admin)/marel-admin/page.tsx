@@ -1,4 +1,5 @@
 import Header from "@/components/header";
+import EmployeeList from "@/components/employee-list";
 
 export default function AdminPage() {
   return (
@@ -6,6 +7,7 @@ export default function AdminPage() {
       <div className="mx-auto max-w-7xl">
         <Header />
         <EmployeeForm />
+        <EmployeeList />
       </div>
     </main>
   );
