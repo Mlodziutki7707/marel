@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+}
+
+enum PaymentStatus {
+  TO_PAY
+  PAID
+}
+
+model User {
+  id        String   @id @default(uuid())
+  publicId  String   @unique @default(uuid())
+
+  role      Role     @default(EMPLOYEE)
+
+  firstName String
+  lastName  String
+
+  hourlyRate Decimal @db.Decimal(10,2)
+
+  active    Boolean  @default(true)
+
+  workEntries WorkEntry[]
+  settlements Settlement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorkEntry {
+  id        String @id @default(uuid())
+
+  workplace String
+
+  workDate  DateTime
+
+  startTime DateTime
+  endTime   DateTime
+
+  hoursWorked Decimal @db.Decimal(5,2)
+
+  hourlyRateSnapshot Decimal @db.Decimal(10,2)
+
+  amount Decimal @db.Decimal(10,2)
+
+  notes String?
+
+  paymentStatus PaymentStatus @default(TO_PAY)
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  settlementId String?
+  settlement Settlement? @relation(fields: [settlementId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([workDate])
+}
+
+model Settlement {
+  id String @id @default(uuid())
+
+  month Int
+  year Int
+
+  totalHours Decimal @db.Decimal(10,2)
+  totalAmount Decimal @db.Decimal(10,2)
+
+  status PaymentStatus @default(TO_PAY)
+
+  paidAt DateTime?
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  workEntries WorkEntry[]
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@unique([userId, month, year])
+}
